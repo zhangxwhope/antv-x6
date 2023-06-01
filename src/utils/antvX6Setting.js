@@ -155,7 +155,7 @@ export const configNodeShape = (type) => {
         stroke: "#5b9bd5",
       },
       label: {
-        fontSize: 16,
+        fontSize: 14,
         fill: "#fff",
         textWrap: {
           width: '90%',

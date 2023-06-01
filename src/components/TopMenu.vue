@@ -289,7 +289,7 @@ export default {
     return {
       style: {
         label: {
-          fontSize: 16,
+          fontSize: 14,
           fill: "#333",
           fontWeight: "normal",
         },

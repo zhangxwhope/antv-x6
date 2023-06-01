@@ -82,7 +82,7 @@ export default {
               attrs: {
                 color: '#5b9bd5',
                 fill: '#5b9bd5',
-                fontSize: 16,
+                fontSize: 14,
                 backgroundColor: cell.isEdge() ? '#fff' : '#5b9bd5',
                 ...attrs
               },
@@ -120,7 +120,7 @@ export default {
                     ...label,
                     color: '#5b9bd5',
                     fill: '#5b9bd5',
-                    fontSize: 16,
+                    fontSize: 14,
                     ...styleAttrs.label,
                     text: label.text,
                   },

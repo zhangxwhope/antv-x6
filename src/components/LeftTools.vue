@@ -97,6 +97,8 @@ export default {
         switch (component.data.type) {
           case 'custom-text':
             break
+          case 'custom-comments':
+            break  
           case "custom-rect-start":
             component.attrs.body.rx = 20
             component.attrs.body.ry = 26

@@ -189,6 +189,28 @@ export const configNodeShape = (type) => {
       ports: configNodePorts()
     },
     {
+      label: '备注',
+      shape: "path",
+      width: 80,
+      height: 50,
+      data: {
+        type: "custom-comments",
+      },
+      path: 'M 0 0 L 65 0 L 80 15 L 65 15 L 65 0 L 80 15 L 80 50 L 0 50 Z',
+      attrs: {
+        ...commonOptions.attrs,
+        body: {
+          fill: "#fff7bc",
+          stroke: "#e5dda8",
+        },
+        label: {
+          ...commonOptions.attrs.label,
+          fill: "#000"
+        }
+      },
+      ports: configNodePorts()
+    },
+    {
       label: "开始/结束",
       shape: "custom-rect",
       width: 80,

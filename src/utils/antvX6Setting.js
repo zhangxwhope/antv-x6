@@ -168,6 +168,27 @@ export const configNodeShape = (type) => {
   };
   const nodeShapeList = [
     {
+      label: '文本',
+      shape: "custom-rect",
+      width: 80,
+      height: 50,
+      data: {
+        type: "custom-text",
+      },
+      attrs: {
+        ...commonOptions.attrs,
+        body: {
+          fill: "transparent",
+          stroke: "transparent",
+        },
+        label: {
+          ...commonOptions.attrs.label,
+          fill: "#000"
+        }
+      },
+      ports: configNodePorts()
+    },
+    {
       label: "开始/结束",
       shape: "custom-rect",
       width: 80,

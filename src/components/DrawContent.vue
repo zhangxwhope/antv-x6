@@ -19,7 +19,7 @@ export default {
   mounted() {
     this.initGraph();
     // 获取上次保存的
-    const json = JSON.parse(localStorage.getItem("graphJson") || {});
+    const json = JSON.parse(localStorage.getItem("graphJson") || '{}');
     this.graph.fromJSON(json);
     this.graph.centerContent();
     this.setCells(this.graph.getCells());

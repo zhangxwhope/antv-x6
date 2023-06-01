@@ -73,7 +73,7 @@ export default {
           },
         },
       });
-      const json = JSON.parse(localStorage.getItem("graphJson") || {});
+      const json = JSON.parse(localStorage.getItem("graphJson") || '{}');
       graph.fromJSON(json);
       graph.centerContent();
     },

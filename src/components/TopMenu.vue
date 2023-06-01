@@ -283,6 +283,7 @@
 <script>
 import { mapState } from "vuex";
 import { DataUri } from "@antv/x6";
+import { basicFillColor, basicStrokeColor, basicFontColor } from "@/utils/antvX6Setting.js"
 
 export default {
   data() {
@@ -290,19 +291,19 @@ export default {
       style: {
         label: {
           fontSize: 14,
-          fill: "#333",
+          fill: basicFontColor,
           fontWeight: "normal",
         },
         body: {
-          fill: "#fff",
-          stroke: "#333",
+          fill: basicFillColor,
+          stroke: basicStrokeColor,
           strokeWidth: 2,
         },
         rect: {
-          fill: "#fff",
+          fill: basicFillColor,
         },
         line: {
-          stroke: "#333",
+          stroke: basicStrokeColor,
           strokeWidth: 2,
         },
       }, // 默认的工具栏样式

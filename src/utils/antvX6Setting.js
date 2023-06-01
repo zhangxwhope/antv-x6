@@ -8,6 +8,13 @@ Graph.registerNode(
   true
 )
 
+// 默认填充颜色
+export const basicFillColor = '#fff'
+// 默认线条颜色
+export const basicStrokeColor = '#333'
+// 默认字体颜色
+export const basicFontColor = '#333'
+
 // 画布基本设置
 export const configSetting = (Shape) => {
   return {
@@ -84,7 +91,7 @@ export const configSetting = (Shape) => {
         return new Shape.Edge({
           attrs: {
             line: {
-              stroke: "#5b9bd5",
+              stroke: basicStrokeColor,
               strokeWidth: 2,
               targetMarker: {
                 name: "block",
@@ -151,12 +158,12 @@ export const configNodeShape = (type) => {
   const commonOptions = {
     attrs: {
       body: {
-        fill: "#5b9bd5",
-        stroke: "#5b9bd5",
+        fill: basicFillColor,
+        stroke: basicStrokeColor,
       },
       label: {
         fontSize: 14,
-        fill: "#fff",
+        fill: basicFontColor,
         textWrap: {
           width: '90%',
           height: '90%',
@@ -180,10 +187,6 @@ export const configNodeShape = (type) => {
         body: {
           fill: "transparent",
           stroke: "transparent",
-        },
-        label: {
-          ...commonOptions.attrs.label,
-          fill: "#000"
         }
       },
       ports: configNodePorts()
@@ -202,10 +205,6 @@ export const configNodeShape = (type) => {
         body: {
           fill: "#fff7bc",
           stroke: "#e5dda8",
-        },
-        label: {
-          ...commonOptions.attrs.label,
-          fill: "#000"
         }
       },
       ports: configNodePorts()

@@ -6,7 +6,7 @@
 
 <script>
 import { Graph, Shape } from "@antv/x6";
-import { configSetting, graphBindKey } from "@/utils/antvX6Setting.js";
+import { configSetting, graphBindKey, basicFillColor, basicFontColor } from "@/utils/antvX6Setting.js";
 import { mapState, mapMutations } from "vuex";
 
 export default {
@@ -80,10 +80,9 @@ export default {
             args: {
               event: e,
               attrs: {
-                color: '#5b9bd5',
-                fill: '#5b9bd5',
+                fill: basicFillColor,
                 fontSize: 14,
-                backgroundColor: cell.isEdge() ? '#fff' : '#5b9bd5',
+                backgroundColor: basicFillColor,
                 ...attrs
               },
             },
@@ -118,8 +117,7 @@ export default {
                   },
                   label: {
                     ...label,
-                    color: '#5b9bd5',
-                    fill: '#5b9bd5',
+                    fill: basicFontColor,
                     fontSize: 14,
                     ...styleAttrs.label,
                     text: label.text,

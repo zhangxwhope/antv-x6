@@ -344,7 +344,7 @@ export default {
       textAlignDict: [
         {
           label: '左对齐',
-          value: 'end'
+          value: 'start'
         },
         {
           label: '水平居中',
@@ -352,11 +352,11 @@ export default {
         },
         {
           label: '右对齐',
-          value: 'start'
+          value: 'end'
         },
         {
           label: '顶端对齐',
-          value: 'bottom'
+          value: 'top'
         },
         {
           label: '垂直居中对齐',
@@ -364,7 +364,7 @@ export default {
         },
         {
           label: '底端对齐',
-          value: 'top'
+          value: 'bottom'
         }
       ]
     };
@@ -613,8 +613,30 @@ export default {
             break
           case 'textAlign':
             if(['start', 'middle', 'end'].includes(val)) {
+              switch (val) {
+                case 'start':
+                  item.attr('label/refX', 0.1)
+                  break
+                case 'middle':
+                  item.attr('label/refX', 0.5)
+                  break
+                case 'end':
+                  item.attr('label/refX', 0.9)
+                  break  
+              }
               item.attr('label/textAnchor', val)
             } else {
+              switch (val) {
+                case 'top':
+                  item.attr('label/refY', 0.1)
+                  break
+                case 'verticalMiddle':
+                  item.attr('label/refY', 0.5)
+                  break
+                case 'bottom':
+                  item.attr('label/refY', 0.9)
+                  break  
+              }
               item.attr('label/textVerticalAnchor', val === 'verticalMiddle' ? 'middle' : val)
             }
             break  

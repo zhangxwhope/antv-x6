@@ -93,6 +93,26 @@
             ></div>
           </div>
         </el-popover>
+        <el-dropdown 
+          placement="bottom" 
+          @command="val => handleChange(val, 'textAlign')"
+        >
+          <span class="el-dropdown-link">
+            <div class="setting-item">
+              <i
+                class="menu-icon el-icon-s-operation"
+                title="文本对齐"
+              ></i>
+            </div>
+          </span>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item 
+              v-for="(item, index) in textAlignDict"
+              :key="index"
+              :command="item.value"
+            >{{ item.label }}</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
       </div>
       <!-- body相关设置 -->
       <div class="setting-group">
@@ -319,6 +339,32 @@ export default {
         {
           label: '虚线',
           value: '10,2'
+        }
+      ],
+      textAlignDict: [
+        {
+          label: '左对齐',
+          value: 'end'
+        },
+        {
+          label: '水平居中',
+          value: 'middle'
+        },
+        {
+          label: '右对齐',
+          value: 'start'
+        },
+        {
+          label: '顶端对齐',
+          value: 'bottom'
+        },
+        {
+          label: '垂直居中对齐',
+          value: 'verticalMiddle'
+        },
+        {
+          label: '底端对齐',
+          value: 'top'
         }
       ]
     };
@@ -565,6 +611,13 @@ export default {
           case 'strokeDasharray':
             item.attr(isEdge ? 'line/strokeDasharray' : 'body/strokeDasharray', val)
             break
+          case 'textAlign':
+            if(['start', 'middle', 'end'].includes(val)) {
+              item.attr('label/textAnchor', val)
+            } else {
+              item.attr('label/textVerticalAnchor', val === 'verticalMiddle' ? 'middle' : val)
+            }
+            break  
           case 'zIndex':
             switch (val) {
               case 'front':

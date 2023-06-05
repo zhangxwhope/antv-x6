@@ -99,6 +99,7 @@
           title="文本行高"
           placeholder="文本行高"
           class="setting-item w80"
+          :disabled="isEdge"
           @change="(val) => handleChange(val, 'lineHeight')"
         >
           <el-option
@@ -110,6 +111,7 @@
         </el-select>
         <el-dropdown 
           placement="bottom" 
+          :disabled="isEdge"
           @command="val => handleChange(val, 'textAlign')"
         >
           <span class="el-dropdown-link">
@@ -466,7 +468,7 @@ export default {
     // 文本行高
     lineHeight: {
        get () {
-        return this.style.label.lineHeight / this.style.label.fontSize
+        return this.isEdge ? '' : this.style.label.lineHeight / this.style.label.fontSize
       },
       set (val) {
         this.style.label.lineHeight = val * this.style.label.fontSize

@@ -163,6 +163,7 @@ export const configNodeShape = (type) => {
       },
       label: {
         fontSize: 14,
+        lineHeight: 17.5, // 默认1.25倍行高
         fill: basicFontColor,
         textWrap: {
           width: '90%',

@@ -82,6 +82,7 @@ export default {
               attrs: {
                 fill: basicFillColor,
                 fontSize: 14,
+                lineHeight: 17.5,
                 backgroundColor: basicFillColor,
                 ...attrs
               },
@@ -119,6 +120,7 @@ export default {
                     ...label,
                     fill: basicFontColor,
                     fontSize: 14,
+                    lineHeight: 17.5,
                     ...styleAttrs.label,
                     text: label.text,
                   },

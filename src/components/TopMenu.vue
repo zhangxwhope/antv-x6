@@ -93,6 +93,21 @@
             ></div>
           </div>
         </el-popover>
+        <el-select
+          v-model="lineHeight"
+          size="small"
+          title="文本行高"
+          placeholder="文本行高"
+          class="setting-item w80"
+          @change="(val) => handleChange(val, 'lineHeight')"
+        >
+          <el-option
+            v-for="item in lineHeightDict"
+            :key="item"
+            :label="item"
+            :value="Number(item)"
+          ></el-option>
+        </el-select>
         <el-dropdown 
           placement="bottom" 
           @command="val => handleChange(val, 'textAlign')"
@@ -311,6 +326,7 @@ export default {
       style: {
         label: {
           fontSize: 14,
+          lineHeight: 17.5,
           fill: basicFontColor,
           fontWeight: "normal",
         },
@@ -366,7 +382,8 @@ export default {
           label: '底端对齐',
           value: 'bottom'
         }
-      ]
+      ],
+      lineHeightDict: ['1.0', '1.25', '1.5', '2.0', '2.5', '3.0']
     };
   },
   computed: {
@@ -444,6 +461,15 @@ export default {
         } else {
           this.style.body.strokeDasharray = val
         }
+      }
+    },
+    // 文本行高
+    lineHeight: {
+       get () {
+        return this.style.label.lineHeight / this.style.label.fontSize
+      },
+      set (val) {
+        this.style.label.lineHeight = val * this.style.label.fontSize
       }
     }
   },
@@ -639,6 +665,9 @@ export default {
               }
               item.attr('label/textVerticalAnchor', val === 'verticalMiddle' ? 'middle' : val)
             }
+            break  
+          case 'lineHeight':
+            item.attr('label/lineHeight', this.style.label.fontSize * val)
             break  
           case 'zIndex':
             switch (val) {

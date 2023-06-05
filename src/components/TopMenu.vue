@@ -237,6 +237,22 @@
             :value="item.value"
           ></el-option>
         </el-select>
+        <el-select
+          v-model="edgeType"
+          size="small"
+          title="连线类型"
+          placeholder="连线类型"
+          class="setting-item w80"
+          :disabled="!isEdge"
+          @change="(val) => handleChange(val, 'edgeType')"
+        >
+          <el-option
+            v-for="item in edgeTypeDict"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
       </div>
        <!-- 图层排列 -->
       <div class="setting-group set-top">
@@ -385,7 +401,25 @@ export default {
           value: 'bottom'
         }
       ],
-      lineHeightDict: ['1.0', '1.25', '1.5', '2.0', '2.5', '3.0']
+      lineHeightDict: ['1.0', '1.25', '1.5', '2.0', '2.5', '3.0'],
+      edgeTypeDict: [
+        {
+          label: '简单',
+          value: 'normal'
+        },
+        {
+          label: '平滑',
+          value: 'smooth'
+        },
+        {
+          label: '圆角',
+          value: 'rounded'
+        },
+        {
+          label: '跳线',
+          value: 'jumpover'
+        }
+      ]
     };
   },
   computed: {
@@ -472,6 +506,16 @@ export default {
       },
       set (val) {
         this.style.label.lineHeight = val * this.style.label.fontSize
+      }
+    },
+    // 连线类型
+    edgeType: {
+       get () {
+        const connector = this.selected.find(item => item.isEdge())?.getConnector() || {}
+        return this.isEdge ? connector.name || 'normal' : ''
+      },
+      set (val) {
+        this.selected.forEach(item => item.isEdge() && item.setConnector(val))
       }
     }
   },

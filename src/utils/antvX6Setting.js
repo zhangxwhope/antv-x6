@@ -93,6 +93,10 @@ export const configSetting = (Shape) => {
             line: {
               stroke: basicStrokeColor,
               strokeWidth: 2,
+              sourceMarker: {
+                width: 12,
+                height: 8,
+              },
               targetMarker: {
                 name: "block",
                 width: 12,

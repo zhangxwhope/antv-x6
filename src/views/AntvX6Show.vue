@@ -61,6 +61,10 @@ export default {
                 line: {
                   stroke: "#333",
                   strokeWidth: 2,
+                  sourceMarker: {
+                    width: 12,
+                    height: 8,
+                  },
                   targetMarker: {
                     name: "block",
                     width: 12,

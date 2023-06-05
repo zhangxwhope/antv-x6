@@ -253,6 +253,38 @@
             :value="item.value"
           ></el-option>
         </el-select>
+        <el-select
+          v-model="sourceMarker"
+          size="small"
+          title="开始箭头"
+          placeholder="开始箭头"
+          class="setting-item w80"
+          :disabled="!isEdge"
+          @change="(val) => handleChange(val, 'sourceMarker')"
+        >
+          <el-option
+            v-for="item in sourceMarkerDict"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+        <el-select
+          v-model="targetMarker"
+          size="small"
+          title="结束箭头"
+          placeholder="结束箭头"
+          class="setting-item w80"
+          :disabled="!isEdge"
+          @change="(val) => handleChange(val, 'targetMarker')"
+        >
+          <el-option
+            v-for="item in sourceMarkerDict"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
       </div>
        <!-- 图层排列 -->
       <div class="setting-group set-top">
@@ -419,6 +451,44 @@ export default {
           label: '跳线',
           value: 'jumpover'
         }
+      ],
+      sourceMarkerDict: [
+        {
+          label: '无',
+          value: ''
+        },
+        {
+          label: '实心',
+          value: 'block'
+        },
+        {
+          label: '经典',
+          value: 'classic'
+        },
+        {
+          label: '菱形',
+          value: 'diamond'
+        },
+        {
+          label: '交叉',
+          value: 'cross'
+        },
+        {
+          label: '非封闭半箭头',
+          value: 'async'
+        },
+        {
+          label: '圆形',
+          value: 'circle'
+        },
+        {
+          label: '圆形和加号',
+          value: 'circlePlus'
+        },
+        {
+          label: '椭圆',
+          value: 'ellipse'
+        }
       ]
     };
   },
@@ -501,7 +571,7 @@ export default {
     },
     // 文本行高
     lineHeight: {
-       get () {
+      get () {
         return this.isEdge ? '' : this.style.label.lineHeight / this.style.label.fontSize
       },
       set (val) {
@@ -510,12 +580,38 @@ export default {
     },
     // 连线类型
     edgeType: {
-       get () {
+      get () {
         const connector = this.selected.find(item => item.isEdge())?.getConnector() || {}
         return this.isEdge ? connector.name || 'normal' : ''
       },
       set (val) {
         this.selected.forEach(item => item.isEdge() && item.setConnector(val))
+      }
+    },
+    // 开始箭头
+    sourceMarker: {
+      get () {
+        return this.isEdge ? this.style.line.sourceMarker?.name || '' : ''
+      },
+      set (val) {
+        this.style.line.sourceMarker = {
+          width: 12,
+          height: 8,
+          ...this.style.line.sourceMarker,
+          name: val
+        }
+      }
+    },
+    // 结束箭头
+    targetMarker: {
+      get () {
+        return this.isEdge ? this.style.line.targetMarker?.name || '' : ''
+      },
+      set (val) {
+        this.style.line.targetMarker = {
+          ...this.style.line.targetMarker,
+          name: val
+        }
       }
     }
   },
@@ -625,6 +721,11 @@ export default {
 
       selectedCells.forEach((item) => {
         const isEdge = item.isEdge();
+        const markerObj = { 
+          name: val,
+          open: val === 'async', // 非封闭半箭头
+          rx: val === 'ellipse' ? 8 : 5 // 椭圆
+        }
         switch (type) {
           case "fontSize":
             if (isEdge) {
@@ -714,6 +815,20 @@ export default {
             break  
           case 'lineHeight':
             item.attr('label/lineHeight', this.style.label.fontSize * val)
+            break
+          case 'sourceMarker':
+            item.attr('line/sourceMarker', {
+              ...item.attrs.line.sourceMarker || {},
+              width: 12,
+              height: 8,
+              ...markerObj
+            })
+            break
+          case 'targetMarker':
+            item.attr('line/targetMarker', {
+              ...item.attrs.line.targetMarker || {},
+              ...markerObj
+            })
             break  
           case 'zIndex':
             switch (val) {

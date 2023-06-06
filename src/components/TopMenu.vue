@@ -1,364 +1,378 @@
 <template>
-  <div class="top-menu">
-    <i
-      class="menu-icon el-icon-refresh-left"
-      :class="{ disabled: !canUndo }"
-      title="撤销(Ctrl+Z)"
-      @click="handleUndo"
-    ></i>
-    <i
-      class="menu-icon el-icon-refresh-right"
-      :class="{ disabled: !canRedo }"
-      title="重做(Ctrl+Shift+Z)"
-      @click="handleRedo"
-    ></i>
-    <div class="style-setting" :class="{ disabled: !hasSelected }">
-      <!-- label相关设置 -->
-      <div class="setting-group style-font">
-        <div
-          class="setting-item interacting font-letter"
-          :class="{
-            checked: style.label.fontWeight === 'bold',
-          }"
-          title="粗体"
-          @click="handleChange('', 'fontWeight')"
-        >
-          B
-        </div>
-        <div
-          class="setting-item interacting font-letter italic"
-          :class="{
-            checked: style.label.fontStyle === 'italic',
-          }"
-          title="斜体"
-          @click="handleChange('', 'fontStyle')"
-        >
-          I
-        </div>
-        <div
-          class="setting-item interacting font-letter underline"
-          :class="{
-            checked: style.label.textDecoration === 'underline',
-          }"
-          title="下划线"
-          @click="handleChange('', 'textDecoration')"
-        >
-          U
-        </div>
-        <el-input-number
-          v-model="style.label.fontSize"
-          class="setting-item"
-          step-strictly
-          controls-position="right"
-          size="small"
-          placeholder="字号"
-          title="字号"
-          :min="12"
-          :max="100"
-          @change="(val) => handleChange(val, 'fontSize')"
-        ></el-input-number>
-        px
-        <el-popover
-          placement="bottom"
-          width="320"
-          trigger="click"
-          ref="labelColorPopper"
-          popper-class="fill-color-popper"
-          :visible-arrow="false"
-          @show="handlePopperShow('labelColorPicker', 'labelFillShow')"
-          @hide="handlePopperHide('labelColorPopper', 'labelFillShow')"
-        >
-          <el-color-picker
-            v-model="style.label.fill"
-            ref="labelColorPicker"
-            size="small"
-            @change="
-              (val) =>
-                handleChange(val, 'color', 'labelColorPopper', 'labelFillShow')
-            "
-          ></el-color-picker>
-          <div slot="reference" class="setting-item">
+  <div class="menu-container">
+    <div class="menu-content" id="menuContent">
+      <i 
+        v-show="showLeft"
+        class="turn-page left el-icon-arrow-left" 
+        @click="handleTurnPage('left')"
+      ></i>
+      <i 
+        v-show="showRight"
+        class="turn-page right el-icon-arrow-right"
+        @click="handleTurnPage('right')"
+      ></i>
+      <div class="top-menu" id="topMenu" :style="{ left: left + 'px' }">
+        <i
+          class="menu-icon el-icon-refresh-left"
+          :class="{ disabled: !canUndo }"
+          title="撤销(Ctrl+Z)"
+          @click="handleUndo"
+        ></i>
+        <i
+          class="menu-icon el-icon-refresh-right"
+          :class="{ disabled: !canRedo }"
+          title="重做(Ctrl+Shift+Z)"
+          @click="handleRedo"
+        ></i>
+        <div class="style-setting" :class="{ disabled: !hasSelected }">
+          <!-- label相关设置 -->
+          <div class="setting-group style-font">
             <div
-              class="interacting font-letter"
-              :class="{ checked: labelFillShow }"
-              title="文本颜色"
+              class="setting-item interacting font-letter"
+              :class="{
+                checked: style.label.fontWeight === 'bold',
+              }"
+              title="粗体"
+              @click="handleChange('', 'fontWeight')"
             >
-              A
+              B
             </div>
             <div
-              class="color-bar"
-              :style="{
-                background: style.label.fill,
+              class="setting-item interacting font-letter italic"
+              :class="{
+                checked: style.label.fontStyle === 'italic',
               }"
-            ></div>
+              title="斜体"
+              @click="handleChange('', 'fontStyle')"
+            >
+              I
+            </div>
+            <div
+              class="setting-item interacting font-letter underline"
+              :class="{
+                checked: style.label.textDecoration === 'underline',
+              }"
+              title="下划线"
+              @click="handleChange('', 'textDecoration')"
+            >
+              U
+            </div>
+            <el-input-number
+              v-model="style.label.fontSize"
+              class="setting-item"
+              step-strictly
+              controls-position="right"
+              size="small"
+              placeholder="字号"
+              title="字号"
+              :min="12"
+              :max="100"
+              @change="(val) => handleChange(val, 'fontSize')"
+            ></el-input-number>
+            px
+            <el-popover
+              placement="bottom"
+              width="320"
+              trigger="click"
+              ref="labelColorPopper"
+              popper-class="fill-color-popper"
+              :visible-arrow="false"
+              @show="handlePopperShow('labelColorPicker', 'labelFillShow')"
+              @hide="handlePopperHide('labelColorPopper', 'labelFillShow')"
+            >
+              <el-color-picker
+                v-model="style.label.fill"
+                ref="labelColorPicker"
+                size="small"
+                @change="
+                  (val) =>
+                    handleChange(val, 'color', 'labelColorPopper', 'labelFillShow')
+                "
+              ></el-color-picker>
+              <div slot="reference" class="setting-item">
+                <div
+                  class="interacting font-letter"
+                  :class="{ checked: labelFillShow }"
+                  title="文本颜色"
+                >
+                  A
+                </div>
+                <div
+                  class="color-bar"
+                  :style="{
+                    background: style.label.fill,
+                  }"
+                ></div>
+              </div>
+            </el-popover>
+            <el-select
+              v-model="lineHeight"
+              size="small"
+              title="文本行高"
+              placeholder="文本行高"
+              class="setting-item w80"
+              :disabled="isEdge"
+              @change="(val) => handleChange(val, 'lineHeight')"
+            >
+              <el-option
+                v-for="item in lineHeightDict"
+                :key="item"
+                :label="item"
+                :value="Number(item)"
+              ></el-option>
+            </el-select>
+            <el-dropdown 
+              placement="bottom" 
+              :disabled="isEdge"
+              @command="val => handleChange(val, 'textAlign')"
+            >
+              <span class="el-dropdown-link">
+                <div class="setting-item">
+                  <i
+                    class="menu-icon el-icon-s-operation"
+                    title="文本对齐"
+                  ></i>
+                </div>
+              </span>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item 
+                  v-for="(item, index) in textAlignDict"
+                  :key="index"
+                  :command="item.value"
+                >{{ item.label }}</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
           </div>
-        </el-popover>
-        <el-select
-          v-model="lineHeight"
-          size="small"
-          title="文本行高"
-          placeholder="文本行高"
-          class="setting-item w80"
-          :disabled="isEdge"
-          @change="(val) => handleChange(val, 'lineHeight')"
-        >
-          <el-option
-            v-for="item in lineHeightDict"
-            :key="item"
-            :label="item"
-            :value="Number(item)"
-          ></el-option>
-        </el-select>
-        <el-dropdown 
-          placement="bottom" 
-          :disabled="isEdge"
-          @command="val => handleChange(val, 'textAlign')"
-        >
-          <span class="el-dropdown-link">
+          <!-- body相关设置 -->
+          <div class="setting-group">
+            <el-popover
+              placement="bottom"
+              width="320"
+              trigger="click"
+              ref="bodyColorPopper"
+              popper-class="fill-color-popper"
+              :visible-arrow="false"
+              @show="handlePopperShow('bodyColorPicker', 'bodyFillShow')"
+              @hide="handlePopperHide('bodyColorPopper', 'bodyFillShow')"
+            >
+              <el-color-picker
+                v-model="fill"
+                ref="bodyColorPicker"
+                size="small"
+                @change="
+                  (val) =>
+                    handleChange(val, 'fill', 'bodyColorPopper', 'bodyFillShow')
+                "
+              ></el-color-picker>
+              <div slot="reference" class="setting-item">
+                <div
+                  class="interacting font-letter"
+                  :class="{ checked: bodyFillShow }"
+                  title="填充样式"
+                >
+                  <i class="el-icon-box"></i>
+                </div>
+                <div
+                  class="color-bar"
+                  :style="{
+                    background: isEdge ? style.rect.fill : style.body.fill,
+                  }"
+                ></div>
+              </div>
+            </el-popover>
+            <el-popover
+              placement="bottom"
+              width="320"
+              trigger="click"
+              ref="bodyStrokePopper"
+              popper-class="fill-color-popper"
+              :visible-arrow="false"
+              @show="handlePopperShow('bodyStrokePicker', 'bodyStrokeShow')"
+              @hide="handlePopperHide('bodyStrokePopper', 'bodyStrokeShow')"
+            >
+              <el-color-picker
+                v-model="stroke"
+                ref="bodyStrokePicker"
+                size="small"
+                @change="
+                  (val) =>
+                    handleChange(
+                      val,
+                      'stroke',
+                      'bodyStrokePopper',
+                      'bodyStrokeShow'
+                    )
+                "
+              ></el-color-picker>
+              <div slot="reference" class="setting-item">
+                <div
+                  class="interacting font-letter"
+                  :class="{ checked: bodyStrokeShow }"
+                  title="线条颜色"
+                >
+                  <i class="el-icon-edit"></i>
+                </div>
+                <div
+                  class="color-bar"
+                  :style="{
+                    background: isEdge ? style.line.stroke : style.body.stroke,
+                  }"
+                ></div>
+              </div>
+            </el-popover>
+            <el-select
+              v-model="strokeWidth"
+              size="small"
+              title="线宽"
+              class="setting-item w80"
+              @change="(val) => handleChange(val, 'strokeWidth')"
+            >
+              <el-option
+                v-for="item in 10"
+                :key="item"
+                :label="`${item}px`"
+                :value="item"
+              ></el-option>
+            </el-select>
+            <el-select
+              v-model="strokeDasharray"
+              size="small"
+              title="线条样式"
+              placeholder="线条样式"
+              class="setting-item w80"
+              @change="(val) => handleChange(val, 'strokeDasharray')"
+            >
+              <el-option
+                v-for="item in lineStyleDict"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+            <el-select
+              v-model="edgeType"
+              size="small"
+              title="连线类型"
+              placeholder="连线类型"
+              class="setting-item w80"
+              :disabled="!isEdge"
+              @change="(val) => handleChange(val, 'edgeType')"
+            >
+              <el-option
+                v-for="item in edgeTypeDict"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+            <el-select
+              v-model="sourceMarker"
+              size="small"
+              title="开始箭头"
+              placeholder="开始箭头"
+              class="setting-item w80"
+              :disabled="!isEdge"
+              @change="(val) => handleChange(val, 'sourceMarker')"
+            >
+              <el-option
+                v-for="item in sourceMarkerDict"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+            <el-select
+              v-model="targetMarker"
+              size="small"
+              title="结束箭头"
+              placeholder="结束箭头"
+              class="setting-item w80"
+              :disabled="!isEdge"
+              @change="(val) => handleChange(val, 'targetMarker')"
+            >
+              <el-option
+                v-for="item in sourceMarkerDict"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </div>
+          <!-- 图层排列 -->
+          <div class="setting-group set-top">
+            <el-dropdown 
+              placement="bottom" 
+              @command="val => handleChange(val, 'zIndex')"
+            >
+              <span class="el-dropdown-link">
+                <div class="setting-item">
+                  <i
+                    class="menu-icon el-icon-coin"
+                    title="图层排列"
+                  ></i>
+                </div>
+              </span>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item command="front">置于顶层</el-dropdown-item>
+                <el-dropdown-item command="back">置于底层</el-dropdown-item>
+                <el-dropdown-item command="1">上移一层</el-dropdown-item>
+                <el-dropdown-item command="-1">下移一层</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </div>
+        </div>
+        <div class="style-setting">
+          <!-- 缩放操作 -->
+          <div class="setting-group set-top">
             <div class="setting-item">
               <i
-                class="menu-icon el-icon-s-operation"
-                title="文本对齐"
+                class="menu-icon el-icon-zoom-in"
+                title="放大"
+                @click="handleZoom(0.2)"
               ></i>
             </div>
-          </span>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item 
-              v-for="(item, index) in textAlignDict"
-              :key="index"
-              :command="item.value"
-            >{{ item.label }}</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-      </div>
-      <!-- body相关设置 -->
-      <div class="setting-group">
-        <el-popover
-          placement="bottom"
-          width="320"
-          trigger="click"
-          ref="bodyColorPopper"
-          popper-class="fill-color-popper"
-          :visible-arrow="false"
-          @show="handlePopperShow('bodyColorPicker', 'bodyFillShow')"
-          @hide="handlePopperHide('bodyColorPopper', 'bodyFillShow')"
-        >
-          <el-color-picker
-            v-model="fill"
-            ref="bodyColorPicker"
-            size="small"
-            @change="
-              (val) =>
-                handleChange(val, 'fill', 'bodyColorPopper', 'bodyFillShow')
-            "
-          ></el-color-picker>
-          <div slot="reference" class="setting-item">
-            <div
-              class="interacting font-letter"
-              :class="{ checked: bodyFillShow }"
-              title="填充样式"
-            >
-              <i class="el-icon-box"></i>
-            </div>
-            <div
-              class="color-bar"
-              :style="{
-                background: isEdge ? style.rect.fill : style.body.fill,
-              }"
-            ></div>
-          </div>
-        </el-popover>
-        <el-popover
-          placement="bottom"
-          width="320"
-          trigger="click"
-          ref="bodyStrokePopper"
-          popper-class="fill-color-popper"
-          :visible-arrow="false"
-          @show="handlePopperShow('bodyStrokePicker', 'bodyStrokeShow')"
-          @hide="handlePopperHide('bodyStrokePopper', 'bodyStrokeShow')"
-        >
-          <el-color-picker
-            v-model="stroke"
-            ref="bodyStrokePicker"
-            size="small"
-            @change="
-              (val) =>
-                handleChange(
-                  val,
-                  'stroke',
-                  'bodyStrokePopper',
-                  'bodyStrokeShow'
-                )
-            "
-          ></el-color-picker>
-          <div slot="reference" class="setting-item">
-            <div
-              class="interacting font-letter"
-              :class="{ checked: bodyStrokeShow }"
-              title="线条颜色"
-            >
-              <i class="el-icon-edit"></i>
-            </div>
-            <div
-              class="color-bar"
-              :style="{
-                background: isEdge ? style.line.stroke : style.body.stroke,
-              }"
-            ></div>
-          </div>
-        </el-popover>
-        <el-select
-          v-model="strokeWidth"
-          size="small"
-          title="线宽"
-          class="setting-item w80"
-          @change="(val) => handleChange(val, 'strokeWidth')"
-        >
-          <el-option
-            v-for="item in 10"
-            :key="item"
-            :label="`${item}px`"
-            :value="item"
-          ></el-option>
-        </el-select>
-        <el-select
-          v-model="strokeDasharray"
-          size="small"
-          title="线条样式"
-          placeholder="线条样式"
-          class="setting-item w80"
-          @change="(val) => handleChange(val, 'strokeDasharray')"
-        >
-          <el-option
-            v-for="item in lineStyleDict"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          ></el-option>
-        </el-select>
-        <el-select
-          v-model="edgeType"
-          size="small"
-          title="连线类型"
-          placeholder="连线类型"
-          class="setting-item w80"
-          :disabled="!isEdge"
-          @change="(val) => handleChange(val, 'edgeType')"
-        >
-          <el-option
-            v-for="item in edgeTypeDict"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          ></el-option>
-        </el-select>
-        <el-select
-          v-model="sourceMarker"
-          size="small"
-          title="开始箭头"
-          placeholder="开始箭头"
-          class="setting-item w80"
-          :disabled="!isEdge"
-          @change="(val) => handleChange(val, 'sourceMarker')"
-        >
-          <el-option
-            v-for="item in sourceMarkerDict"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          ></el-option>
-        </el-select>
-        <el-select
-          v-model="targetMarker"
-          size="small"
-          title="结束箭头"
-          placeholder="结束箭头"
-          class="setting-item w80"
-          :disabled="!isEdge"
-          @change="(val) => handleChange(val, 'targetMarker')"
-        >
-          <el-option
-            v-for="item in sourceMarkerDict"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          ></el-option>
-        </el-select>
-      </div>
-       <!-- 图层排列 -->
-      <div class="setting-group set-top">
-        <el-dropdown 
-          placement="bottom" 
-          @command="val => handleChange(val, 'zIndex')"
-        >
-          <span class="el-dropdown-link">
             <div class="setting-item">
               <i
-                class="menu-icon el-icon-coin"
-                title="图层排列"
+                class="menu-icon el-icon-zoom-out"
+                title="缩小"
+                @click="handleZoom(-0.2)"
               ></i>
             </div>
-          </span>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="front">置于顶层</el-dropdown-item>
-            <el-dropdown-item command="back">置于底层</el-dropdown-item>
-            <el-dropdown-item command="1">上移一层</el-dropdown-item>
-            <el-dropdown-item command="-1">下移一层</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-      </div>
-    </div>
-    <div class="style-setting">
-      <!-- 缩放操作 -->
-      <div class="setting-group set-top">
-        <div class="setting-item">
-          <i
-            class="menu-icon el-icon-zoom-in"
-            title="放大"
-            @click="handleZoom(0.2)"
-          ></i>
-        </div>
-        <div class="setting-item">
-          <i
-            class="menu-icon el-icon-zoom-out"
-            title="缩小"
-            @click="handleZoom(-0.2)"
-          ></i>
-        </div>
-        <div class="setting-item">
-          <i
-            class="menu-icon el-icon-rank"
-            title="重置缩放"
-            @click="handleZoom(0)"
-          ></i>
-        </div>
-        <div class="setting-item">
-          <i
-            class="menu-icon el-icon-more"
-            :class="{ disabled: !hasCells }"
-            title="居中"
-            @click="handleCenter"
-          ></i>
-        </div>
-      </div>
-      <!-- 导出、保存操作 -->
-      <div class="setting-group set-top">
-        <div class="setting-item">
-          <i
-            class="menu-icon el-icon-download"
-            :class="{ disabled: !hasCells }"
-            title="导出为图片"
-            @click="handleExport"
-          ></i>
-        </div>
-        <div class="setting-item">
-          <i
-            class="menu-icon el-icon-finished"
-            :class="{ disabled: !hasCells }"
-            title="保存"
-            @click="handleSave"
-          ></i>
+            <div class="setting-item">
+              <i
+                class="menu-icon el-icon-rank"
+                title="重置缩放"
+                @click="handleZoom(0)"
+              ></i>
+            </div>
+            <div class="setting-item">
+              <i
+                class="menu-icon el-icon-more"
+                :class="{ disabled: !hasCells }"
+                title="居中"
+                @click="handleCenter"
+              ></i>
+            </div>
+          </div>
+          <!-- 导出、保存操作 -->
+          <div class="setting-group set-top">
+            <div class="setting-item">
+              <i
+                class="menu-icon el-icon-download"
+                :class="{ disabled: !hasCells }"
+                title="导出为图片"
+                @click="handleExport"
+              ></i>
+            </div>
+            <div class="setting-item">
+              <i
+                class="menu-icon el-icon-finished"
+                :class="{ disabled: !hasCells }"
+                title="保存"
+                @click="handleSave"
+              ></i>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -373,6 +387,9 @@ import { basicFillColor, basicStrokeColor, basicFontColor } from "@/utils/antvX6
 export default {
   data() {
     return {
+      left: 0,
+      menuContentWidth: 0,
+      topMenuWidth: 0,
       style: {
         label: {
           fontSize: 14,
@@ -513,6 +530,15 @@ export default {
     isEdge() {
       return this.selectedStyle.isEdge;
     },
+    // 是否显示左箭头
+    showLeft() {
+      return this.left < 0
+    },
+    // 是否显示右箭头
+    showRight() {
+      return this.topMenuWidth > this.menuContentWidth 
+        && this.topMenuWidth - this.menuContentWidth > Math.abs(this.left)
+    },
     // 填充颜色
     fill: {
       get() {
@@ -625,6 +651,13 @@ export default {
   },
   created() {
     this.initStyle = JSON.parse(JSON.stringify(this.style));
+  },
+  mounted() {
+    this.getToolWidth()
+    window.onresize = () => {
+      this.left = 0
+      this.getToolWidth()
+    }
   },
   methods: {
     // 工具栏设置对应选中的节点/边的相关数据
@@ -861,16 +894,64 @@ export default {
       this[show] = false;
       this.$refs[popper].showPopper = false;
     },
+    // 获取工具栏相关元素宽度
+    getToolWidth() {
+      this.menuContentWidth = document.getElementById('menuContent').offsetWidth
+      setTimeout(() => {
+        this.topMenuWidth = document.getElementById('topMenu').offsetWidth
+      }, 100)
+    },
+    // 翻页
+    handleTurnPage(type) {
+      const step = this.topMenuWidth - this.menuContentWidth + 16
+      switch (type) {
+        case 'left':
+          this.left < 0 && (this.left += step)
+          break
+        case 'right':
+          (this.menuContentWidth + Math.abs(this.left) < this.topMenuWidth)
+            && (this.left -= step)
+          break  
+      }
+    }
   },
 };
 </script>
 
 <style lang="scss" scoped>
+.menu-container{
+  position: relative;
+  height: 40px;
+  background: #f6f7f8;
+  .turn-page{
+    position: absolute;
+    width: 32px;
+    text-align: center;
+    font-size: 24px;
+    height: 100%;
+    line-height: 40px;
+    z-index: 3;
+    background: #f6f7f8;
+    cursor: pointer;
+    &.left{
+      left: 0;
+    }
+    &.right{
+      right: 0;
+    }
+  }
+  .menu-content{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    overflow: hidden;
+  }
+}
 .top-menu {
+  position: absolute;
   display: flex;
   align-items: center;
-  width: 100%;
-  height: 40px;
+  height: 100%;
   padding: 0 16px;
   background: #f6f7f8;
   border-top: 1px solid #dfe2e5;

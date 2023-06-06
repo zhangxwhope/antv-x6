@@ -249,8 +249,24 @@ export default {
 .draw-content {
   display: flex;
   flex: 1;
+  width: calc(100% - 220px);
   .draw-wrapper {
     flex: 1;
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+</style>
+
+<style lang="scss">
+.draw-content{
+  .x6-cell-tool{
+    position: relative;
+  }
+  .x6-cell-tool-editor{
+    position: absolute;
+  }
+  .x6-graph-scroller-pannable{
     width: 100% !important;
     height: 100% !important;
   }

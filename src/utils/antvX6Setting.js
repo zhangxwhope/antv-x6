@@ -34,6 +34,12 @@ export const configSetting = (Shape) => {
         },
       ],
     },
+    scroller: {
+      padding: '',
+      enabled: true,
+      pannable: true,
+      modifiers: 'ctrl'
+    },
     snapline: true,
     history: {
       enabled: true,

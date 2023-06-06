@@ -35,20 +35,26 @@ export default {
             },
           ],
         },
+        scroller: {
+          padding: '',
+          enabled: true,
+          pannable: true,
+          modifiers: 'ctrl'
+        },
         autoResize: true,
         interacting: false,
         connecting: {
           router: {
             name: "manhattan",
             args: {
-              padding: 1,
-            },
+              padding: {
+                vertical: 20,
+                horizontal: 20
+              }
+            }
           },
           connector: {
-            name: "rounded",
-            args: {
-              radius: 8,
-            },
+            name: 'normal'
           },
           anchor: "center",
           connectionPoint: "anchor",

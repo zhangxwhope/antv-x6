@@ -923,6 +923,8 @@ export default {
   position: relative;
   height: 40px;
   background: #f6f7f8;
+  border-top: 1px solid #dfe2e5;
+  border-bottom: 1px solid #dfe2e5;
   .turn-page{
     position: absolute;
     width: 32px;
@@ -953,9 +955,6 @@ export default {
   align-items: center;
   height: 100%;
   padding: 0 16px;
-  background: #f6f7f8;
-  border-top: 1px solid #dfe2e5;
-  border-bottom: 1px solid #dfe2e5;
   .menu-icon {
     font-size: 26px;
     cursor: pointer;

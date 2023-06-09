@@ -201,8 +201,11 @@ export default {
           node.attr('lane-rect/width', size.width)
           // 同时改变父元素或者子元素的大小
           if(node.parent) {
-            node.parent.size(node.parent.size().width, size.height)
-            node.parent.position(node.parent.position().x, position.y)
+            const parentPosition = node.parent.position()
+            const parentSize = node.parent.size()
+            node.parent.size(parentSize.width, size.height)
+            const offset = Math.abs(parentPosition.x) - Math.abs(position.x) - parentSize.width
+            node.parent.position(node.parent.position().x + offset, position.y)
           }
           if(node.children) {
             node.children.forEach(item => {

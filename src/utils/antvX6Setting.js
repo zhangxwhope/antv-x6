@@ -1,5 +1,12 @@
 import { Graph } from "@antv/x6";
 
+// 默认填充颜色
+export const basicFillColor = '#fff'
+// 默认线条颜色
+export const basicStrokeColor = '#333'
+// 默认字体颜色
+export const basicFontColor = '#333'
+
 Graph.registerNode(
   'custom-rect',
   {
@@ -8,12 +15,51 @@ Graph.registerNode(
   true
 )
 
-// 默认填充颜色
-export const basicFillColor = '#fff'
-// 默认线条颜色
-export const basicStrokeColor = '#333'
-// 默认字体颜色
-export const basicFontColor = '#333'
+Graph.registerNode(
+  'lane',
+  {
+    inherit: 'rect',
+    markup: [
+      {
+        tagName: 'rect',
+        selector: 'body',
+      },
+      {
+        tagName: 'rect',
+        selector: 'lane-rect',
+      },
+      {
+        tagName: 'text',
+        selector: 'lane-text',
+      },
+    ],
+    attrs: {
+      body: {
+        fill: 'transparent',
+        stroke: basicStrokeColor,
+        strokeWidth: 2,
+      },
+      'lane-rect': {
+        width: 50,
+        height: 20,
+        fill: basicFillColor,
+        stroke: basicStrokeColor,
+        strokeWidth: 2,
+        x: 0,
+      },
+      'lane-text': {
+        ref: 'lane-rect',
+        refY: 0.5,
+        refX: 0.5,
+        textAnchor: 'middle',
+        fontWeight: 'bold',
+        fill: basicFontColor,
+        fontSize: 14,
+      },
+    },
+  },
+  true,
+)
 
 // 画布基本设置
 export const configSetting = (Shape) => {
@@ -65,7 +111,7 @@ export const configSetting = (Shape) => {
     rotating: true,
     resizing: {
       enabled: true,
-      orthogonal: false,
+      orthogonal: true,
       restricted: true,
     },
     panning: {
@@ -142,24 +188,23 @@ export const configSetting = (Shape) => {
       edgeMovable: true,
       edgeLabelMovable: true,
     },
-    // embedding: {
-    //   enabled: true,
-    //   findParent({ node }) {
-    //     const bbox = node.getBBox();
-    //     return this.getNodes().filter((target) => {
-    //       const targetBBox = target.getBBox();
-    //       // 当容器节点大于当前节点时且容器节点的zIndex小于当前节点时，才可嵌入
-    //       if (
-    //         targetBBox.width > bbox.width &&
-    //         targetBBox.height > bbox.height &&
-    //         target.zIndex < node.zIndex
-    //       ) {
-    //         return bbox.isIntersectWithRect(targetBBox);
-    //       }
-    //       return false;
-    //     });
-    //   },
-    // },
+    embedding: {
+      enabled: true,
+      findParent({ node }) {
+        const bbox = node.getBBox();
+        return this.getNodes().filter((target) => {
+          const targetBBox = target.getBBox();
+          // 当容器节点大于当前节点时且容器节点的zIndex小于当前节点时，才可嵌入
+          if (
+            targetBBox.width >= bbox.width &&
+            targetBBox.height >= bbox.height
+          ) {
+            return bbox.isIntersectWithRect(targetBBox);
+          }
+          return false;
+        });
+      },
+    },
   };
 };
 
@@ -292,6 +337,17 @@ export const configNodeShape = (type) => {
     //   },
     //   ...commonOptions,
     // },
+    {
+      label: '',
+      shape: 'lane',
+      width: 50,
+      height: 80,
+      data: {
+        type: 'lane',
+        group: 'lane'
+      },
+      ports: configNodePorts()
+    }
   ];
   if (type) {
     const obj = nodeShapeList.find((item) => {

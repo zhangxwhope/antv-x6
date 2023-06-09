@@ -76,7 +76,10 @@ export default {
           {
             name: "basic",
             title: "基础流程图",
-            collapsable: false,
+          },
+          {
+            name: "lane",
+            title: "泳道图",
           },
         ],
         // search: (cell, keyword) => {
@@ -120,7 +123,11 @@ export default {
         }
         return kind ? new kind(component) : graph.createNode(component);
       });
-      stencil.load(components, "basic");
+
+      const basicComponents = components.filter(item => item.data.group !== 'lane')
+      const laneComponents = components.filter(item => item.data.group === 'lane')
+      stencil.load(basicComponents, "basic");
+      stencil.load(laneComponents, "lane");
     },
   },
 };
@@ -163,6 +170,9 @@ export default {
     .x6-widget-stencil-group > .x6-widget-stencil-group-title{
       background: #f6f7f8;
       font-size: 16px;
+    }
+    .x6-widget-stencil-title{
+      display: none;
     }
   }
 

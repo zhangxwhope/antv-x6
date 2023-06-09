@@ -192,6 +192,37 @@ export default {
         });
       });
 
+      // 调整节点大小时触发事件
+      graph.on('node:resizing', ({ node}) => {
+        if(node.data.group === 'lane') {
+          const size = node.size()
+          const position = node.position()
+
+          node.attr('lane-rect/width', size.width)
+          // 同时改变父元素或者子元素的大小
+          if(node.parent) {
+            node.parent.size(node.parent.size().width, size.height)
+            node.parent.position(node.parent.position().x, position.y)
+          }
+          if(node.children) {
+            node.children.forEach(item => {
+              item.size(item.size().width, size.height)
+              item.position(item.position().x, position.y)
+            })
+          }
+        }
+      })
+
+      graph.on('node:embedded', ({ node, currentParent }) => {
+        if(node.data.group === 'lane' && currentParent.data.group === 'lane') {
+          const size = currentParent.size()
+          const position = currentParent.position()
+          node.attr('lane-rect/width', size.width)
+          node.size( size.width,  size.height)
+          node.position(position.x + size.width, position.y)
+        }
+      })
+
       // 历史队列改变事件
       graph.history.on("change", () => {
         this.setCanUndo(graph.history.canUndo());

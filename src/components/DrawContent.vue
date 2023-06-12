@@ -219,7 +219,22 @@ export default {
               } else { // 往左缩短
                 node.parent.position(node.parent.position().x - Math.abs(offset), position.y)
               }  
-            }  
+            }
+
+            // 如果是在顶部向上拉伸或向下压缩，则改变lane-rect的高度
+            const positionYOffset = Math.abs(position.y) - Math.abs(parentPosition.y)
+            let laneHeight
+            if(positionYOffset >= 0) { // 向上拉伸
+              laneHeight = node.attr('lane-rect/height') + positionYOffset
+              node.attr('lane-rect/height', laneHeight)
+              node.parent.attr('lane-rect/height', laneHeight)
+            } else { // 向下压缩
+              laneHeight = node.attr('lane-rect/height') - Math.abs(positionYOffset)
+              if(laneHeight >= 20) {
+                node.attr('lane-rect/height', laneHeight)
+                node.parent.attr('lane-rect/height', laneHeight)
+              }
+            }
           }
           if(node.children) {
             node.children.forEach(item => {
@@ -234,6 +249,21 @@ export default {
               } else { // child在右边
                 childOffset = size.width - Math.abs(positionOffset)
                 item.position(item.position().x + childOffset, position.y)
+              }
+
+              // 如果是在顶部向上拉伸或向下压缩，则改变lane-rect的高度
+              const positionYOffset = Math.abs(position.y) - Math.abs(childPosition.y)
+              let laneHeight
+              if(positionYOffset >= 0) { // 向上拉伸
+                laneHeight = node.attr('lane-rect/height') + positionYOffset
+                node.attr('lane-rect/height', laneHeight)
+                item.attr('lane-rect/height', laneHeight)
+              } else { // 向下压缩
+                laneHeight = node.attr('lane-rect/height') - Math.abs(positionYOffset)
+                if(laneHeight >= 20) {
+                  node.attr('lane-rect/height', laneHeight)
+                  item.attr('lane-rect/height', laneHeight) 
+                }
               }
             })
           }

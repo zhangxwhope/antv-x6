@@ -197,20 +197,44 @@ export default {
         if(node.data.group === 'lane') {
           const size = node.size()
           const position = node.position()
-
           node.attr('lane-rect/width', size.width)
           // 同时改变父元素或者子元素的大小
           if(node.parent) {
             const parentPosition = node.parent.position()
             const parentSize = node.parent.size()
             node.parent.size(parentSize.width, size.height)
-            const offset = Math.abs(parentPosition.x) - Math.abs(position.x) - parentSize.width
-            node.parent.position(node.parent.position().x + offset, position.y)
+            const positionOffset = Math.abs(parentPosition.x) - Math.abs(position.x)
+            let offset
+            if(positionOffset >= 0) { // parent在左边
+              offset = parentSize.width - positionOffset
+              if(offset >= 0) { // 往左拉长
+                node.parent.position(node.parent.position().x - offset, position.y)
+              } else { // 往右缩短
+                node.parent.position(node.parent.position().x + Math.abs(offset), position.y)
+              }
+            } else { // parent在右边
+              offset =  size.width - Math.abs(positionOffset)
+              if(offset >= 0) { // 往右拉长
+                node.parent.position(node.parent.position().x + offset, position.y)
+              } else { // 往左缩短
+                node.parent.position(node.parent.position().x - Math.abs(offset), position.y)
+              }  
+            }  
           }
           if(node.children) {
             node.children.forEach(item => {
-              item.size(item.size().width, size.height)
-              item.position(item.position().x, position.y)
+              const childPosition = item.position()
+              const childSize = item.size()
+              item.size(childSize.width, size.height)
+              const positionOffset = Math.abs(childPosition.x) - Math.abs(position.x)
+              let childOffset
+              if(positionOffset >= 0) { // child在左边
+                childOffset = childSize.width - positionOffset
+                item.position(item.position().x - childOffset, position.y)
+              } else { // child在右边
+                childOffset = size.width - Math.abs(positionOffset)
+                item.position(item.position().x + childOffset, position.y)
+              }
             })
           }
         }
@@ -218,11 +242,17 @@ export default {
 
       graph.on('node:embedded', ({ node, currentParent }) => {
         if(node.data.group === 'lane' && currentParent.data.group === 'lane') {
+          const nodePosition = node.position()
           const size = currentParent.size()
           const position = currentParent.position()
           node.attr('lane-rect/width', size.width)
           node.size( size.width,  size.height)
-          node.position(position.x + size.width, position.y)
+          const offset = Math.abs(Math.abs(nodePosition.x) - Math.abs(position.x))
+          if(offset >= size.width / 2) { // 在右边嵌入
+            node.position(position.x + size.width, position.y)
+          } else { // 在左边嵌入
+            node.position(position.x - size.width, position.y)
+          }
         }
       })
 

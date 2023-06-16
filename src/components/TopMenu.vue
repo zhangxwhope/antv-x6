@@ -320,6 +320,29 @@
               </el-dropdown-menu>
             </el-dropdown>
           </div>
+          <!-- 分布对齐 -->
+          <div class="setting-group set-top">
+            <el-dropdown 
+              placement="bottom" 
+              @command="val => handleChange(val, 'layoutAlign')"
+            >
+              <span class="el-dropdown-link">
+                <div class="setting-item">
+                  <i
+                    class="menu-icon el-icon-s-grid"
+                    title="分布对齐"
+                  ></i>
+                </div>
+              </span>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item 
+                  v-for="(item, index) in layoutAlignDict"
+                  :key="index"
+                  :command="item.value"
+                >{{ item.label }}</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </div>
         </div>
         <div class="style-setting">
           <!-- 缩放操作 -->
@@ -505,6 +528,40 @@ export default {
         {
           label: '椭圆',
           value: 'ellipse'
+        }
+      ],
+      layoutAlignDict: [
+        {
+          label: '左对齐',
+          value: 'left'
+        },
+        {
+          label: '居中对齐',
+          value: 'middle'
+        },
+        {
+          label: '右对齐',
+          value: 'right'
+        },
+        {
+          label: '顶端对齐',
+          value: 'top'
+        },
+        {
+          label: '垂直居中对齐',
+          value: 'verticalMiddle'
+        },
+        {
+          label: '底端对齐',
+          value: 'bottom'
+        },
+        {
+          label: '水平平均分布',
+          value: 'horizontal'
+        },
+        {
+          label: '垂直平均分布',
+          value: 'vertical'
         }
       ]
     };
@@ -831,7 +888,7 @@ export default {
                   break  
               }
               item.attr('label/textAnchor', val)
-            } else {
+            } else if(['top', 'verticalMiddle', 'bottom'].includes(val)) {
               switch (val) {
                 case 'top':
                   item.attr('label/refY', 0.1)
@@ -878,11 +935,104 @@ export default {
                 item.zIndex = item.zIndex - 1
                 break      
             }
-            break  
+            break
         }
       });
 
+      // 分布对齐
+      if(type === 'layoutAlign') {
+        switch (val) {
+          case 'left':
+          case 'right':  
+            this.setLayoutAlignOther('x', selectedCells, val)
+            break
+          case 'middle':
+            this.setLayoutAlignMiddle('x', selectedCells)
+            break
+          case 'top':
+          case 'bottom':  
+            this.setLayoutAlignOther('y', selectedCells, val)
+            break
+          case 'verticalMiddle':
+            this.setLayoutAlignMiddle('y', selectedCells)
+            break
+          case 'horizontal': // 水平平均分布
+            this.setSameDistance('x', selectedCells)
+            break
+          case 'vertical': // 垂直平均分布
+            this.setSameDistance('y', selectedCells)
+            break  
+        }
+      }
+
       popper && show && this.handlePopperHide(popper, show);
+    },
+    // 设置分布对齐【左对齐、右对齐、顶端对齐、底端对齐】
+    setLayoutAlignOther(prop, selectedCells, val) {
+      const selectedNodes = selectedCells.filter(cell => cell.isNode())
+      const positions = selectedNodes.map(cell => cell.position()[prop]).sort((a, b) => a - b)
+      const max = Math.max.apply(this, positions)
+      const min = Math.min.apply(this, positions)
+
+      selectedNodes.forEach(cell => {
+        if(prop === 'y') {
+          cell.position(cell.position().x, val === 'top' ? min : max)
+        } else {
+          cell.position(val === 'left' ? min : max, cell.position().y)
+        }
+      })
+    },
+    // 设置分布对齐【居中对齐、垂直居中对齐】
+    setLayoutAlignMiddle(prop, selectedCells) {
+      const selectedNodes = selectedCells.filter(cell => cell.isNode())
+      const positions = selectedNodes.map(cell => cell.position()[prop]).sort((a, b) => a - b)
+      const max = Math.max.apply(this, positions)
+      const min = Math.min.apply(this, positions)
+      let middlePos
+      if(max < 0 && min < 0) {
+        middlePos = min - max
+      } else if(max >= 0 && min >= 0) {
+        middlePos = max - min
+      } else {
+        middlePos = max + min
+      }
+      
+      selectedNodes.forEach(cell => {
+        if(prop === 'y') {
+          cell.position(cell.position().x, middlePos / 2)
+        } else {
+          cell.position(middlePos / 2, cell.position().y)
+        }
+      })
+    },
+    // 设置水平或者垂直等距
+    setSameDistance(prop, selectedCells) {
+      const selectedNodes = selectedCells.filter(cell => cell.isNode())
+      const positions = selectedNodes.map(cell => cell.position()[prop]).sort((a, b) => a - b)
+
+      let distance = 0
+      for(let i = 0; i < positions.length - 1; i++) {
+        const prev = positions[i]
+        const curr = positions[i + 1]
+        if((prev <= 0 && curr <= 0) || (prev >= 0 && curr >= 0)) {
+          distance += Math.abs(prev - curr)
+        } else {
+          distance += Math.abs(prev) + Math.abs(curr)
+        }
+      }
+      
+      for(let i in selectedNodes) {
+        if(i > 0 && i < selectedNodes.length - 1) {
+          const cell = selectedNodes[i]
+          const prev = selectedNodes[i - 1]
+          if(prop === 'y') {
+            cell.position(cell.position().x, prev.position()[prop] + distance / (selectedNodes.length - 1))
+          } else {
+            cell.position(prev.position()[prop] + distance / (selectedNodes.length - 1), cell.position().y)
+          }
+          
+        }
+      }
     },
     // popper显示事件
     handlePopperShow(picker, show) {

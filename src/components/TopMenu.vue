@@ -996,20 +996,22 @@ export default {
       const positions = selectedNodes.map(cell => cell.position()[prop]).sort((a, b) => a - b)
       const max = Math.max.apply(this, positions)
       const min = Math.min.apply(this, positions)
+      if (max === min) return
       let middlePos
       if(max < 0 && min < 0) {
         middlePos = min - max
       } else if(max >= 0 && min >= 0) {
         middlePos = max - min
       } else {
-        middlePos = max + min
+        middlePos = Math.abs(max) + Math.abs(min)
       }
       
+      const newPosition = middlePos > 0 ? max - middlePos / 2 : min - middlePos / 2
       selectedNodes.forEach(cell => {
         if(prop === 'y') {
-          cell.position(cell.position().x, middlePos / 2)
+          cell.position(cell.position().x, newPosition)
         } else {
-          cell.position(middlePos / 2, cell.position().y)
+          cell.position(newPosition, cell.position().y)
         }
       })
     },

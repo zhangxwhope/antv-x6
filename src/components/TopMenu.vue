@@ -808,6 +808,20 @@ export default {
     // 工具栏设置发生改变
     handleChange(val, type, popper, show) {
       const selectedCells = this.graph.getSelectedCells();
+      switch (type) {
+        case 'fontWeight':
+          this.style.label.fontWeight =
+              this.style.label.fontWeight === 'bold' ? 'normal' : 'bold'
+          break
+        case 'fontStyle':
+          this.style.label.fontStyle =
+              this.style.label.fontStyle === 'italic' ? 'normal' : 'italic'
+          break
+        case 'textDecoration':
+          this.style.label.textDecoration =
+              this.style.label.textDecoration === 'underline' ? 'none' : 'underline'
+          break
+      }
 
       selectedCells.forEach((item) => {
         const isEdge = item.isEdge();
@@ -825,8 +839,6 @@ export default {
             }
             break;
           case "fontWeight":
-            this.style.label.fontWeight =
-              this.style.label.fontWeight === "bold" ? "normal" : "bold";
             if (isEdge) {
               this.setLabels(item, { fontWeight: this.style.label.fontWeight });
             } else {
@@ -834,8 +846,6 @@ export default {
             }
             break;
           case "fontStyle":
-            this.style.label.fontStyle =
-              this.style.label.fontStyle === "italic" ? "normal" : "italic";
             if (isEdge) {
               this.setLabels(item, { fontStyle: this.style.label.fontStyle });
             } else {
@@ -843,8 +853,6 @@ export default {
             }
             break
           case "textDecoration":
-            this.style.label.textDecoration =
-              this.style.label.textDecoration === "underline" ? "none" : "underline";
             if (isEdge) {
               this.setLabels(item, { textDecoration: this.style.label.textDecoration });
             } else {

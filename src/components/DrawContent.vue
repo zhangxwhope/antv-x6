@@ -209,18 +209,19 @@ export default {
               if(laneX > childLaneX) { // child在左边
                 if(position.x < childPosition.x) { // 往左拉伸
                   const offset = size.width - laneWidth
-                  item.size(offset, childSize.height)
+                  item.size(offset, size.height)
                   item.attr('lane-rect/width', offset)
                   node.attr('lane-rect/x', offset)
                 } else { // 往右拉伸
                   const offset = size.width - childSize.width
                   node.attr('lane-rect/width', offset)
+                  item.size(childSize.width, size.height)
                 }
               } else { // child在右边
                 const distance = Math.abs(Math.abs(position.x) - Math.abs(childPosition.x))
                 if(distance === laneWidth) { // 往右拉伸
                   const offset = size.width - laneWidth
-                  item.size(offset, childSize.height)
+                  item.size(offset, size.height)
                   item.attr('lane-rect/width', offset)
                 } else { // 往左拉伸
                   const offset = Math.abs(Math.abs(position.x) - Math.abs(childPosition.x))

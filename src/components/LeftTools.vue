@@ -76,6 +76,7 @@ export default {
           {
             name: "basic",
             title: "基础流程图",
+            collapsed: true // TODO Delete
           },
           {
             name: "lane",

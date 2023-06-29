@@ -6,7 +6,7 @@
 
 <script>
 import { Graph, Shape } from "@antv/x6";
-import { configSetting, graphBindKey, basicFillColor, basicFontColor } from "@/utils/antvX6Setting.js";
+import { configSetting, configNodePorts, graphBindKey, basicFillColor, basicFontColor } from "@/utils/antvX6Setting.js";
 import { mapState, mapMutations } from "vuex";
 
 export default {
@@ -195,80 +195,48 @@ export default {
       // 调整节点大小时触发事件
       graph.on('node:resizing', ({ node}) => {
         if(node.data.group === 'lane') {
-          const size = node.size()
           const position = node.position()
-          node.attr('lane-rect/width', size.width)
-          // 同时改变父元素或者子元素的大小
-          if(node.parent) {
-            const parentPosition = node.parent.position()
-            const parentSize = node.parent.size()
-            node.parent.size(parentSize.width, size.height)
-            const positionOffset = Math.abs(parentPosition.x) - Math.abs(position.x)
-            let offset
-            if(positionOffset >= 0) { // parent在左边
-              offset = parentSize.width - positionOffset
-              if(offset >= 0) { // 往左拉长
-                node.parent.position(node.parent.position().x - offset, position.y)
-              } else { // 往右缩短
-                node.parent.position(node.parent.position().x + Math.abs(offset), position.y)
-              }
-            } else { // parent在右边
-              offset =  size.width - Math.abs(positionOffset)
-              if(offset >= 0) { // 往右拉长
-                node.parent.position(node.parent.position().x + offset, position.y)
-              } else { // 往左缩短
-                node.parent.position(node.parent.position().x - Math.abs(offset), position.y)
-              }  
-            }
-
-            // 如果是在顶部向上拉伸或向下压缩，则改变lane-rect的高度
-            const positionYOffset = Math.abs(position.y) - Math.abs(parentPosition.y)
-            let laneHeight
-            if(positionYOffset >= 0) { // 向上拉伸
-              laneHeight = node.attr('lane-rect/height') + positionYOffset
-              node.attr('lane-rect/height', laneHeight)
-              node.parent.attr('lane-rect/height', laneHeight)
-            } else { // 向下压缩
-              laneHeight = node.attr('lane-rect/height') - Math.abs(positionYOffset)
-              if(laneHeight >= 20) {
-                node.attr('lane-rect/height', laneHeight)
-                node.parent.attr('lane-rect/height', laneHeight)
-              }
-            }
-          }
+          const size = node.size()
+          // node.attr('lane-rect/width', size.width)
+          // 同时改变子元素的大小
           if(node.children) {
             node.children.forEach(item => {
               const childPosition = item.position()
               const childSize = item.size()
-              item.size(childSize.width, size.height)
               const positionOffset = Math.abs(childPosition.x) - Math.abs(position.x)
-              let childOffset
-              if(positionOffset >= 0) { // child在左边
-                childOffset = childSize.width - positionOffset
-                item.position(item.position().x - childOffset, position.y)
-              } else { // child在右边
-                childOffset = size.width - Math.abs(positionOffset)
-                item.position(item.position().x + childOffset, position.y)
+              if(Math.abs(positionOffset) >= size.width) { // 往左
+                console.log('往左')
+                const offsetWidth = size.width - childSize.width
+                node.attr('lane-rect/width', offsetWidth)
+                item.attr('body/x', offsetWidth)
+                item.attr('lane-rect/x', offsetWidth)
+                // item.position(childPosition.x + offsetWidth, childPosition.y)
+              } else { // 往右
+                console.log('往右')
+                const offsetWidth = size.width - Math.abs(positionOffset) / 2
+                item.attr('lane-rect/width', offsetWidth)
+                item.size(offsetWidth, size.height)
               }
 
               // 如果是在顶部向上拉伸或向下压缩，则改变lane-rect的高度
-              const positionYOffset = Math.abs(position.y) - Math.abs(childPosition.y)
-              let laneHeight
-              if(positionYOffset >= 0) { // 向上拉伸
-                laneHeight = node.attr('lane-rect/height') + positionYOffset
-                node.attr('lane-rect/height', laneHeight)
-                item.attr('lane-rect/height', laneHeight)
-              } else { // 向下压缩
-                laneHeight = node.attr('lane-rect/height') - Math.abs(positionYOffset)
-                if(laneHeight >= 20) {
-                  node.attr('lane-rect/height', laneHeight)
-                  item.attr('lane-rect/height', laneHeight) 
-                }
-              }
+              // const positionYOffset = Math.abs(position.y) - Math.abs(childPosition.y)
+              // let laneHeight
+              // if(positionYOffset >= 0) { // 向上拉伸
+              //   laneHeight = node.attr('lane-rect/height') + positionYOffset
+              //   node.attr('lane-rect/height', laneHeight)
+              //   item.attr('lane-rect/height', laneHeight)
+              // } else { // 向下压缩
+              //   laneHeight = node.attr('lane-rect/height') - Math.abs(positionYOffset)
+              //   if(laneHeight >= 20) {
+              //     node.attr('lane-rect/height', laneHeight)
+              //     item.attr('lane-rect/height', laneHeight) 
+              //   }
+              // }
             })
           }
         }
       })
+     
 
       graph.on('node:embedded', ({ node, currentParent }) => {
         if(node.data.group === 'lane' && currentParent.data.group === 'lane') {
@@ -276,15 +244,44 @@ export default {
           const size = currentParent.size()
           const position = currentParent.position()
           node.attr('lane-rect/width', size.width)
-          node.size( size.width,  size.height)
-          const offset = Math.abs(Math.abs(nodePosition.x) - Math.abs(position.x))
-          if(offset >= size.width / 2) { // 在右边嵌入
+          node.size(size.width,  size.height)
+          const isRight =  nodePosition.x > (position.x + size.width / 2)
+          if(isRight) { // 在右边嵌入
+            node.attr('body/x', size.width)
+            node.attr('lane-rect/x', size.width)
             node.position(position.x + size.width, position.y)
           } else { // 在左边嵌入
+            currentParent.attr('lane-rect/x', size.width)
             node.position(position.x - size.width, position.y)
           }
+
+          const { groups, items } = configNodePorts()
+          const addPorts = []
+          items.forEach(item => {
+            addPorts.push({
+              ...groups[item.group],
+              group: item.group
+            })
+          })
+
+          const parent = document.querySelector(`[data-cell-id="${currentParent.id}"]`)
+          const child = document.querySelector(`[data-cell-id="${node.id}"]`)
+          // 移除子元素的链接桩
+          const ports  = child.getElementsByClassName('x6-port')
+          Array.from(ports).forEach(item => {
+            child.removeChild(item)
+          })
+          Array.from(child.childNodes).forEach(child => {
+            parent.appendChild(child)
+          })
+          child.parentNode.removeChild(child)
+          currentParent.resize(size.width * 2, size.height, {
+            direction: isRight ? 'bottom-right' : 'top-left'
+          })
         }
       })
+     
+      
 
       // 历史队列改变事件
       graph.history.on("change", () => {

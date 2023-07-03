@@ -6,7 +6,7 @@
 
 <script>
 import { Graph, Shape } from "@antv/x6";
-import { configSetting, configNodePorts, graphBindKey, basicFillColor, basicFontColor } from "@/utils/antvX6Setting.js";
+import { configSetting, graphBindKey, basicFillColor, basicFontColor } from "@/utils/antvX6Setting.js";
 import { mapState, mapMutations } from "vuex";
 
 export default {
@@ -253,15 +253,6 @@ export default {
             currentParent.attr('lane-rect/x', size.width)
             node.position(position.x - size.width, position.y)
           }
-
-          const { groups, items } = configNodePorts()
-          const addPorts = []
-          items.forEach(item => {
-            addPorts.push({
-              ...groups[item.group],
-              group: item.group
-            })
-          })
 
           const parent = document.querySelector(`[data-cell-id="${currentParent.id}"]`)
           const child = document.querySelector(`[data-cell-id="${node.id}"]`)

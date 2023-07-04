@@ -28,10 +28,10 @@ Graph.registerNode(
         tagName: 'rect',
         selector: 'lane-rect',
       },
-      {
-        tagName: 'text',
-        selector: 'lane-text',
-      },
+      // {
+      //   tagName: 'text',
+      //   selector: 'lane-text',
+      // },
     ],
     attrs: {
       body: {
@@ -46,16 +46,17 @@ Graph.registerNode(
         stroke: basicStrokeColor,
         strokeWidth: 2,
         x: 0,
+        class: 'lane-rect'
       },
-      'lane-text': {
-        ref: 'lane-rect',
-        refY: 0.5,
-        refX: 0.5,
-        textAnchor: 'middle',
-        fontWeight: 'bold',
-        fill: basicFontColor,
-        fontSize: 14,
-      },
+      // 'lane-text': {
+      //   ref: 'lane-rect',
+      //   refY: 0.5,
+      //   refX: 0.5,
+      //   textAnchor: 'middle',
+      //   fontWeight: 'bold',
+      //   fill: basicFontColor,
+      //   fontSize: 14,
+      // },
     },
   },
   true,

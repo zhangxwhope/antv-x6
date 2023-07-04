@@ -192,9 +192,33 @@ export default {
         });
       });
 
+      graph.on("node:added", ({ node }) => {
+        if(node.data?.group === 'lane') {
+          const size = node.size()
+          const position = node.position()
+          const sizeWidth = size.width * 3
+          const sizeHeight = size.height * 3
+          node.size(sizeWidth, sizeHeight)
+          node.attr('lane-rect/width', sizeWidth)
+          const child = graph.createNode({
+            size: {
+              width: sizeWidth,
+              height: 20
+            },
+            position: {
+              ...position
+            }
+          })
+          const parent =  document.querySelector(`[data-cell-id="${node.id}"]`)
+          const laneRect = parent.getElementsByClassName('lane-rect')
+          parent.removeChild(laneRect[0])
+          node.embed(child)
+        }
+      })
+
       // 调整节点大小时触发事件
       graph.on('node:resizing', ({ node}) => {
-        if(node.data.group === 'lane') {
+        if(node.data?.group === 'lane') {
           const position = node.position()
           const size = node.size()
           const laneWidth = node.attr('lane-rect/width')
@@ -238,33 +262,26 @@ export default {
      
 
       graph.on('node:embedded', ({ node, currentParent }) => {
-        if(node.data.group === 'lane' && currentParent.data.group === 'lane') {
+        if(node.data?.group === 'lane' && currentParent.data?.group === 'lane') {
           const nodePosition = node.position()
           const size = currentParent.size()
           const position = currentParent.position()
-          node.attr('lane-rect/width', size.width)
           node.size(size.width,  size.height)
           const isRight =  nodePosition.x > (position.x + size.width / 2)
+          let positionX
+          const positionY = position.y
           if(isRight) { // 在右边嵌入
             node.attr('body/x', size.width)
-            node.attr('lane-rect/x', size.width)
-            node.position(position.x + size.width, position.y)
+            positionX = position.x + size.width
+            node.position(positionX, positionY)
           } else { // 在左边嵌入
-            currentParent.attr('lane-rect/x', size.width)
-            node.position(position.x - size.width, position.y)
+            positionX = position.x - size.width
+            node.position(positionX, positionY)
           }
-
-          const parent = document.querySelector(`[data-cell-id="${currentParent.id}"]`)
-          const child = document.querySelector(`[data-cell-id="${node.id}"]`)
-          // 移除子元素的链接桩
-          const ports  = child.getElementsByClassName('x6-port')
-          Array.from(ports).forEach(item => {
-            child.removeChild(item)
-          })
-          Array.from(child.childNodes).forEach(child => {
-            parent.appendChild(child)
-          })
-          child.parentNode.removeChild(child)
+          if(node.children) {
+            node.children[0].position(positionX, positionY)
+          }
+          node.removePorts()
           currentParent.resize(size.width * 2, size.height, {
             direction: isRight ? 'bottom-right' : 'top-left'
           })

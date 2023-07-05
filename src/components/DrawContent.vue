@@ -247,7 +247,6 @@ export default {
               const childSize = child.size()
               const childLaneRect = child.children?.find(child => child.data?.type === 'lane-rect')
               const childLaneX = childLaneRect?.position().x
-
               if(laneX > childLaneX) { // child在左边
                 if(position.x < childPosition.x) { // 往左拉伸
                   const offset = size.width - laneWidth
@@ -287,6 +286,10 @@ export default {
               }
 
             })
+          } else {
+            // 只有当前节点
+            laneRect?.size(size.width,  laneRect?.size().height)
+            laneRect?.position(position.x, position.y)
           }
         }
       })
@@ -311,6 +314,7 @@ export default {
           }
           if(node.children) {
             node.children[0].position(positionX, positionY)
+            node.children[0].size(size.width, node.children[0].size().height)
           }
           node.removePorts()
           currentParent.resize(size.width * 2, size.height, {

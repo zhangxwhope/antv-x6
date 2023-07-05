@@ -199,7 +199,6 @@ export default {
           const sizeWidth = size.width * 3
           const sizeHeight = size.height * 3
           node.size(sizeWidth, sizeHeight)
-          node.attr('lane-rect/width', sizeWidth)
           const child = graph.createNode({
             size: {
               width: sizeWidth,
@@ -207,11 +206,27 @@ export default {
             },
             position: {
               ...position
+            },
+            data: {
+              type: 'lane-rect'
             }
           })
           const parent =  document.querySelector(`[data-cell-id="${node.id}"]`)
           const laneRect = parent.getElementsByClassName('lane-rect')
           parent.removeChild(laneRect[0])
+          // 移除attrs中的lane-rect
+          const attrsArr = Object.entries(node.attrs).filter(([key]) => key !== 'lane-rect')
+          const attrs = {}
+          attrsArr.forEach(([key, value]) => {
+            attrs[key] = value
+          })
+          node.setAttrs(attrs, {
+            overwrite: true
+          })
+          // 移除markup
+          const markup = node.getMarkup().filter(item => item.selector !== 'lane-rect')
+          node.setMarkup(markup)
+
           node.embed(child)
         }
       })
@@ -221,39 +236,56 @@ export default {
         if(node.data?.group === 'lane') {
           const position = node.position()
           const size = node.size()
-          const laneWidth = node.attr('lane-rect/width')
-          const laneX = node.attr('lane-rect/x')
+          const laneRect = node.children?.find(child => child.data?.type === 'lane-rect')
+          const laneWidth = laneRect?.size().width
+          const laneX = laneRect?.position().x
+          const otherChildren = node.children?.filter(child => child.data?.type === 'lane')
           // 同时改变子元素的大小
-          if(node.children) {
-            node.children.forEach(item => {
-              const childPosition = item.position()
-              const childSize = item.size()
-              const childLaneX = item.attr('lane-rect/x')
+          if(otherChildren.length > 0) {
+            otherChildren.forEach(child => {
+              const childPosition = child.position()
+              const childSize = child.size()
+              const childLaneRect = child.children?.find(child => child.data?.type === 'lane-rect')
+              const childLaneX = childLaneRect?.position().x
 
               if(laneX > childLaneX) { // child在左边
                 if(position.x < childPosition.x) { // 往左拉伸
                   const offset = size.width - laneWidth
-                  item.size(offset, size.height)
-                  item.attr('lane-rect/width', offset)
-                  node.attr('lane-rect/x', offset)
+                  child.size(offset, size.height)
+                  child.position(position.x, childPosition.y)
+                  childLaneRect?.size(offset, childLaneRect?.size().height)
+                  childLaneRect?.position(position.x, childLaneRect?.position().y)
+                } else if(position.x > childPosition.x) {
+                  const offset = childSize.width - (laneWidth - (size.width - childSize.width))
+                  child.size(offset, size.height)
+                  child.position(position.x, position.y)
+                  childLaneRect?.size(offset, childLaneRect?.size().height)
+                  childLaneRect?.position(position.x, position.y)
+                  laneRect?.position(laneRect?.position().x, position.y)
                 } else { // 往右拉伸
                   const offset = size.width - childSize.width
-                  node.attr('lane-rect/width', offset)
-                  item.size(childSize.width, size.height)
+                  child.size(childSize.width, size.height)
+                  child.position(position.x, position.y)
+                  childLaneRect?.position(position.x, position.y)
+                  laneRect?.size(offset, laneRect.size().height)
+                  laneRect?.position(laneRect?.position().x, position.y)
                 }
               } else { // child在右边
                 const distance = Math.abs(Math.abs(position.x) - Math.abs(childPosition.x))
                 if(distance === laneWidth) { // 往右拉伸
                   const offset = size.width - laneWidth
-                  item.size(offset, size.height)
-                  item.attr('lane-rect/width', offset)
+                  child.size(offset, size.height)
+                  child.position(childPosition.x, position.y)
+                  childLaneRect?.size(offset, childLaneRect?.size().height)
+                  childLaneRect?.position(childLaneRect?.position().x, position.y)
+                  laneRect?.position(laneRect?.position().x, position.y)
                 } else { // 往左拉伸
                   const offset = Math.abs(Math.abs(position.x) - Math.abs(childPosition.x))
-                  node.attr('lane-rect/width', offset)
-                  item.attr('body/x', offset)
-                  item.attr('lane-rect/x', offset)
+                  laneRect?.size(offset, laneRect.size().height)
+                  laneRect?.position(position.x, laneRect?.position().y)
                 }
               }
+
             })
           }
         }
@@ -271,7 +303,6 @@ export default {
           let positionX
           const positionY = position.y
           if(isRight) { // 在右边嵌入
-            node.attr('body/x', size.width)
             positionX = position.x + size.width
             node.position(positionX, positionY)
           } else { // 在左边嵌入

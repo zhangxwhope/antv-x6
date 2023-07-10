@@ -294,10 +294,9 @@ export default {
         }
       })
       
-     
-
       graph.on('node:embedded', ({ node, currentParent }) => {
         if(node.data?.group === 'lane' && currentParent.data?.group === 'lane') {
+          if(node.parent && node.parent.id === currentParent.id) return
           const nodePosition = node.position()
           const size = currentParent.size()
           const position = currentParent.position()
@@ -322,8 +321,24 @@ export default {
           })
         }
       })
-     
       
+     
+      graph.on('node:moving', ({ node }) => {
+        const position = node.position()
+        const size = node.size()
+        const parent = node.parent
+        if(parent) {
+          const parentPosition = parent.position()
+          const distance = Math.abs(Math.abs(parentPosition.x) - Math.abs(position.x))
+          const offset = parentPosition.x + (distance - size.width)
+          parent.position(offset, position.y)
+          const laneRect = parent.children?.find(child => child.data?.type === 'lane-rect')
+          laneRect?.position(offset, position.y)
+        }
+      })
+      
+      
+
       // 历史队列改变事件
       graph.history.on("change", () => {
         this.setCanUndo(graph.history.canUndo());

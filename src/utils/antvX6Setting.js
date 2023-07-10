@@ -198,7 +198,8 @@ export const configSetting = (Shape) => {
           // 当容器节点大于当前节点时且容器节点的zIndex小于当前节点时，才可嵌入
           if (
             targetBBox.width >= bbox.width &&
-            targetBBox.height >= bbox.height
+            targetBBox.height >= bbox.height &&
+            targetBBox.x !== bbox.x
           ) {
             return bbox.isIntersectWithRect(targetBBox);
           }
